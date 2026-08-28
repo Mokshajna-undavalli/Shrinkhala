@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shrinkhala — Secure Document Chain</title>
+  <meta name="description" content="Shrinkhala: Self-auditing document management system for legal and investigation documents. Cross-references facts across case files in real-time.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <span class="logo-icon" aria-hidden="true">🔗</span>
+        <div>
+          <h1 class="brand-title">SHRINKHALA</h1>
+          <span class="brand-subtitle">The Chain</span>
+        </div>
+      </div>
+      
+      <nav class="nav-menu" aria-label="Main Navigation">
+        <a id="nav-dashboard" class="nav-item active" tabindex="0">
+          <span class="nav-icon" aria-hidden="true">📊</span>
+          <span>Dashboard</span>
+        </a>
+        <a id="nav-ingestion" class="nav-item" tabindex="0">
+          <span class="nav-icon" aria-hidden="true">📄</span>
+          <span>Document Ingestion</span>
+        </a>
+        <a id="nav-diary" class="nav-item" tabindex="0">
+          <span class="nav-icon" aria-hidden="true">📒</span>
+          <span>Case Diary</span>
+        </a>
+        <a id="nav-audit" class="nav-item" tabindex="0">
+          <span class="nav-icon" aria-hidden="true">🔍</span>
+          <span>Integrity Audit</span>
+        </a>
+      </nav>
+      
+      <!-- Case Selector -->
+      <div class="case-selector-section">
+        <div class="case-selector-label">ACTIVE CASE</div>
+        <select id="case-select" class="form-control" aria-label="Select active case">
+          <option value="" disabled selected>Loading cases...</option>
+        </select>
+        <button id="btn-new-case" class="btn btn-outline btn-sm w-100" aria-label="Create new case">
+          + New Case
+        </button>
+      </div>
+      
+      <div class="sidebar-footer">
+        <div class="case-id" id="sidebar-case-id">No case selected</div>
+        <div class="user-role">SI Rajesh Kumar</div>
+        <div class="case-doc-count text-muted" id="sidebar-doc-count"></div>
+      </div>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+      
+      <!-- TAB 1: Dashboard -->
+      <section id="tab-dashboard" class="tab-content">
+        <header class="page-header">
+          <h2>Command Dashboard</h2>
+          <p class="page-subtitle">Real-time case health overview</p>
+        </header>
+        
+        <div class="grid-row">
+          <div class="card col-4">
+            <div class="card-header">Trial Readiness</div>
+            <div class="card-body gauge-container" id="gauge-container">
+              <svg class="gauge-svg" viewBox="0 0 200 200">
+                <defs>
+                  <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="var(--accent)" />
+                    <stop offset="100%" stop-color="var(--success)" />
+                  </linearGradient>
+                </defs>
+                <circle cx="100" cy="100" r="90" fill="none" stroke="#1e3a5f" stroke-width="12" />
+                <circle id="gauge-arc" cx="100" cy="100" r="90" fill="none" stroke="url(#gaugeGradient)" stroke-width="12" stroke-dasharray="565.48" stroke-dashoffset="565.48" stroke-linecap="round" transform="rotate(-90 100 100)" />
+              </svg>
+              <div class="gauge-center">
+                <span id="gauge-value">0%</span>
+                <span id="gauge-label">Trial Ready</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-8 metrics-grid">
+            <div class="metric-card" id="metric-total-docs">
+              <div class="metric-icon" aria-hidden="true">📄</div>
+              <div class="metric-info">
+                <span id="metric-total-docs-value" class="metric-value">0</span>
+                <span class="metric-label">Total Documents</span>
+              </div>
+            </div>
+            
+            <div class="metric-card" id="metric-open-conflicts">
+              <div class="metric-icon" aria-hidden="true">⚠️</div>
+              <div class="metric-info">
+                <span id="metric-open-conflicts-value" class="metric-value">0</span>
+                <span class="metric-label">Open Conflicts</span>
+              </div>
+            </div>
+            
+            <div class="metric-card" id="metric-integrity-status">
+              <div class="metric-icon" aria-hidden="true">🛡️</div>
+              <div class="metric-info">
+                <span id="metric-integrity-value" class="metric-value text-success">N/A</span>
+                <span class="metric-label">Chain Integrity</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card">
+          <div class="card-header">Recent Activity</div>
+          <div class="card-body">
+            <div id="activity-timeline" class="timeline">
+              <!-- Populated by JS -->
+              <div class="timeline-item">
+                <div class="timeline-time">Today, 10:45 AM</div>
+                <div class="timeline-content">System initialized. Waiting for ingestion.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: Document Ingestion -->
+      <section id="tab-ingestion" class="tab-content hidden">
+        <header class="page-header">
+          <h2>Document Ingestion</h2>
+          <p class="page-subtitle">Upload, process & secure evidence</p>
+        </header>
+        
+        <div class="grid-row">
+          <div class="col-7">
+            <div class="card">
+              <div class="card-header">Upload Zone</div>
+              <div class="card-body">
+                <div id="drop-zone" class="drop-zone" tabindex="0" aria-label="File upload drop zone">
+                  <div class="drop-zone-icon">☁️</div>
+                  <div class="drop-zone-text">Drag & drop files here</div>
+                  <div class="drop-zone-text">or click to browse</div>
+                  <div class="drop-zone-hint">Supports PDF, PNG, JPG</div>
+                  <input id="file-input" type="file" accept=".pdf,.png,.jpg,.jpeg" hidden>
+                </div>
+                
+                <div class="form-group">
+                  <label for="doc-type-select" class="form-label">Document Type</label>
+                  <select id="doc-type-select">
+                    <option value="" disabled selected>Select document type...</option>
+                    <option value="fir">FIR (First Information Report)</option>
+                    <option value="seizure_memo">Seizure Memo</option>
+                    <option value="fsl_report">FSL Report (Forensic Lab)</option>
+                    <option value="witness_statement">Witness Statement (Sec 161)</option>
+                    <option value="charge_sheet">Charge Sheet</option>
+                    <option value="panchnama">Panchnama</option>
+                  </select>
+                </div>
+                
+                <button id="btn-process" class="btn btn-primary w-100" aria-label="Process and Secure Document">
+                  🔒 Process & Secure
+                </button>
+                <div id="processing-status" class="mt-3 text-center text-muted"></div>
+              </div>
+            </div>
+            
+            <div class="card">
+              <div class="card-header">
+                <span>Document Viewer</span>
+                <select id="role-select" class="form-control" style="width: auto; padding: 0.25rem 0.5rem;">
+                  <option value="io">Investigation Officer</option>
+                  <option value="prosecutor">Prosecutor</option>
+                  <option value="defense">Defense Lawyer</option>
+                </select>
+              </div>
+              <div class="card-body">
+                <div id="document-preview" class="document-preview">
+                  <p class="text-muted text-center" style="margin-top: 20%;">Select a document to preview...</p>
+                </div>
+                
+                <div id="entities-panel" class="entities-panel hidden">
+                  <div class="entities-header">Extracted Entities</div>
+                  <div id="entity-tags-container" class="entity-tags">
+                    <!-- Populated by JS -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-5">
+            <div class="card h-100">
+              <div class="card-header">
+                <span>Secured Documents</span>
+                <span class="badge badge-info" id="secured-docs-count">0</span>
+              </div>
+              <div class="card-body">
+                <div id="uploaded-docs-list" class="doc-list">
+                  <p class="text-muted text-center">No documents uploaded yet.</p>
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: Case Diary -->
+      <section id="tab-diary" class="tab-content hidden">
+        <header class="page-header">
+          <h2>Case Diary</h2>
+          <p class="page-subtitle">Hash-chained investigation log</p>
+        </header>
+        
+        <div class="grid-row">
+          <div class="col-8">
+            <div class="card">
+              <div class="card-header">New Entry</div>
+              <div class="card-body">
+                <textarea id="diary-textarea" class="form-control" placeholder="Enter today's investigation notes..." rows="6"></textarea>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+                  <div class="text-muted font-size-sm">
+                    🎲 Beacon: <span id="beacon-display" class="mono text-accent">loading...</span>
+                  </div>
+                  <button id="btn-commit-diary" class="btn btn-primary">
+                    ⛓️ Commit Entry
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-4">
+            <div class="card h-100">
+              <div class="card-header">Chain Stats</div>
+              <div class="card-body" style="display: flex; flex-direction: column; gap: 1rem;">
+                <div>
+                  <div class="text-muted" style="font-size: 0.8rem; text-transform: uppercase;">Total Entries</div>
+                  <div id="diary-chain-count" style="font-size: 1.5rem; font-weight: 700;">0</div>
+                </div>
+                <div>
+                  <div class="text-muted" style="font-size: 0.8rem; text-transform: uppercase;">Chain Status</div>
+                  <div id="diary-chain-status" class="text-success" style="font-weight: 700;">Genesis</div>
+                </div>
+                <div>
+                  <div class="text-muted" style="font-size: 0.8rem; text-transform: uppercase;">Last Hash</div>
+                  <div id="diary-last-hash" class="mono text-secondary" style="font-size: 0.85rem; word-break: break-all;">0000...0000</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card">
+          <div class="card-header">Immutable Ledger</div>
+          <div class="card-body table-responsive">
+            <table class="ledger-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Timestamp</th>
+                  <th>Entry</th>
+                  <th>Prev Hash</th>
+                  <th>Current Hash</th>
+                  <th>Beacon</th>
+                </tr>
+              </thead>
+              <tbody id="diary-ledger-body">
+                <tr>
+                  <td colspan="6" class="text-center text-muted">No entries yet. Commit your first diary entry.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: Integrity Audit -->
+      <section id="tab-audit" class="tab-content hidden">
+        <header class="page-header">
+          <h2>Integrity Audit</h2>
+          <p class="page-subtitle text-danger">The Red Room — Cross-reference analysis</p>
+        </header>
+        
+        <div class="card">
+          <div class="card-body" style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; gap: 1rem;">
+              <button id="btn-audit" class="btn btn-danger">🔍 Audit Case</button>
+              <button id="btn-disclosure" class="btn btn-outline">📦 Generate Disclosure Proof</button>
+            </div>
+            <div id="audit-summary" class="text-muted">
+              Ready to audit.
+            </div>
+          </div>
+        </div>
+        
+        <div class="card">
+          <div class="card-header">BNSS Procedural Checklist</div>
+          <div class="card-body">
+            <div id="procedural-checklist" class="checklist">
+              <div class="checklist-item checklist-missing">
+                <span class="checklist-icon">❌</span>
+                <span>FIR registered within 24 hours of incident report</span>
+              </div>
+              <div class="checklist-item checklist-missing">
+                <span class="checklist-icon">❌</span>
+                <span>Seizure memo signed by independent witnesses</span>
+              </div>
+              <div class="checklist-item checklist-missing">
+                <span class="checklist-icon">❌</span>
+                <span>Statements under Sec 161 recorded and attached</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card" style="border-color: rgba(255, 59, 59, 0.3);">
+          <div class="card-header" style="background: rgba(255, 59, 59, 0.1);">Identified Conflicts</div>
+          <div class="card-body">
+            <div id="conflicts-container" class="accordion">
+              <p class="text-muted text-center" id="no-conflicts-msg">Run an audit to cross-reference facts across documents.</p>
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+      </section>
+      
+    </main>
+  </div>
+  
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+  
+  <!-- Modal -->
+  <div id="modal-overlay" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-title">Modal Title</h3>
+        <button id="modal-close" class="btn-close" aria-label="Close modal">✕</button>
+      </div>
+      <div id="modal-body" class="modal-body">
+        Modal Content
+      </div>
+    </div>
+  </div>
+  
+  <!-- Scripts -->
+  <script src="crypto.js"></script>
+  <script src="storage.js"></script>
+  <script src="extraction.js"></script>
+  <script src="audit.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
