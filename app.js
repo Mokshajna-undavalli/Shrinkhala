@@ -734,19 +734,21 @@
           const docB = conflict.details && conflict.details.documentB;
 
           let comparisonHTML = '';
-          if (docA && docB) {
+          if (docA || docB) {
             comparisonHTML = `
               <div class="conflict-comparison">
+                ${docA ? `
                 <div class="conflict-doc-a">
                   <strong>Document A:</strong> ${docA.name || 'Unknown'}<br>
                   Field: ${docA.field}<br>
                   Value: <span class="highlight-val">${docA.value}</span>
-                </div>
+                </div>` : ''}
+                ${docB ? `
                 <div class="conflict-doc-b">
                   <strong>Document B:</strong> ${docB.name || 'Unknown'}<br>
                   Field: ${docB.field}<br>
                   Value: <span class="highlight-val">${docB.value}</span>
-                </div>
+                </div>` : ''}
               </div>
             `;
           }

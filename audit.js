@@ -25,7 +25,7 @@ window.Shrinkhala.Audit = (function() {
             citation: 'Union of India v. Bal Mukund Sah (2009) — Absence of contemporaneous seizure memo makes the recovery doubtful and unreliable.',
             bnss: 'Section 188 BNSS requires preparation of a seizure list at the time of seizure.'
         },
-        missing_fsl: {
+        missing_fsl_report: {
             citation: 'Bhola Singh v. State of Punjab (2011) — Prosecution must establish the nature of the substance through FSL report; oral evidence alone is insufficient.',
             bnss: 'Section 293 BNSS: Report of Chemical Examiner is admissible as evidence; its absence weakens the prosecution case.'
         },
@@ -191,15 +191,20 @@ window.Shrinkhala.Audit = (function() {
 
         const procStatus = checkProceduralChecklist(documents);
         for (const missingType of procStatus.missing) {
+            const reqEntry = procStatus.required.find(r => r.type === missingType);
+            const friendlyName = reqEntry ? reqEntry.name : missingType;
             const conflictKey = `missing_${missingType}`;
             const citationInfo = LEGAL_CITATIONS[conflictKey] || {citation: 'Legal requirement not met.', bnss: 'Procedural irregularity.'};
             conflicts.push({
                 id: generateId(),
                 type: 'procedural',
                 severity: 'WARNING',
-                title: `Missing Document: ${missingType}`,
-                description: `Required document ${missingType} is missing from the case file.`,
-                details: { documentA: {name: 'System', field: 'missing', value: missingType}, documentB: null },
+                title: `Missing Document: ${friendlyName}`,
+                description: `The case file does not include a "${friendlyName}". This is a mandatory document under standard procedure, and its absence should be addressed before trial.`,
+                details: {
+                    documentA: { name: 'Procedural Checklist', field: 'Required Document', value: friendlyName },
+                    documentB: { name: 'Case File', field: 'Upload Status', value: 'Not Uploaded / Not Found' }
+                },
                 legalCitation: citationInfo.citation,
                 bnssSection: citationInfo.bnss
             });
